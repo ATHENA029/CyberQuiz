@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CyberQuiz — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c10;
+    --surface: #0d1117;
+    --surface2: #111820;
+    --border: #1e2a36;
+    --accent: #00e5ff;
+    --accent2: #ff3e6c;
+    --text: #c9d8e8;
+    --text-dim: #4a6070;
+    --green: #00ff9d;
+    --yellow: #ffd700;
+    --font-mono: 'Share Tech Mono', monospace;
+    --font-main: 'Rajdhani', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-main);
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  nav {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .nav-logo {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-shadow: 0 0 12px rgba(0,229,255,0.4);
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .nav-user {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+
+  .nav-user span {
+    color: var(--accent);
+  }
+
+  .btn-logout {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    padding: 6px 14px;
+    cursor: pointer;
+    border-radius: 2px;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+
+  .btn-logout:hover {
+    border-color: var(--accent2);
+    color: var(--accent2);
+  }
+
+  .main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .page-header {
+    margin-bottom: 40px;
+    animation: fadeIn 0.5s ease forwards;
+  }
+
+  .page-header h2 {
+    font-family: var(--font-mono);
+    font-size: 22px;
+    color: var(--text);
+    letter-spacing: 2px;
+  }
+
+  .page-header p {
+    color: var(--text-dim);
+    font-size: 15px;
+    margin-top: 6px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Stats row */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 40px;
+    animation: fadeIn 0.5s ease 0.1s both;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.5s ease;
+  }
+
+  .stat-card.loaded::after {
+    transform: scaleX(1);
+  }
+
+  .stat-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .stat-value {
+    font-family: var(--font-mono);
+    font-size: 32px;
+    color: var(--accent);
+    text-shadow: 0 0 16px rgba(0,229,255,0.3);
+  }
+
+  .stat-value.green { color: var(--green); text-shadow: 0 0 16px rgba(0,255,157,0.3); }
+  .stat-value.yellow { color: var(--yellow); text-shadow: 0 0 16px rgba(255,215,0,0.3); }
+
+  /* Section title */
+  .section-title {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Module cards */
+  .modules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 40px;
+    animation: fadeIn 0.5s ease 0.2s both;
+  }
+
+  .module-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 24px;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    display: block;
+  }
+
+  .module-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0,229,255,0.05), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .module-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+
+  .module-card:hover::before { opacity: 1; }
+
+  .module-number {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+  }
+
+  .module-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+
+  .module-desc {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+
+  .module-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .badge {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 1px;
+    padding: 4px 10px;
+    border-radius: 2px;
+    text-transform: uppercase;
+  }
+
+  .badge-pending {
+    background: rgba(74,96,112,0.2);
+    border: 1px solid var(--text-dim);
+    color: var(--text-dim);
+  }
+
+  .badge-complete {
+    background: rgba(0,255,157,0.1);
+    border: 1px solid var(--green);
+    color: var(--green);
+  }
+
+  .module-score {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--accent);
+  }
+
+  .module-arrow {
+    font-size: 20px;
+    color: var(--accent);
+    transition: transform 0.2s;
+  }
+
+  .module-card:hover .module-arrow {
+    transform: translateX(4px);
+  }
+
+  /* Badges section */
+  .badges-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    animation: fadeIn 0.5s ease 0.3s both;
+  }
+
+  .badge-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s;
+  }
+
+  .badge-item.earned {
+    border-color: var(--yellow);
+    background: rgba(255,215,0,0.05);
+  }
+
+  .badge-icon {
+    font-size: 24px;
+    filter: grayscale(1);
+    opacity: 0.3;
+  }
+
+  .badge-item.earned .badge-icon {
+    filter: none;
+    opacity: 1;
+  }
+
+  .badge-name {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+
+  .badge-item.earned .badge-name {
+    color: var(--yellow);
+  }
+
+  .loading {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    animation: blink 1s infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">⬡ CYBERQUIZ</div>
+  <div class="nav-right">
+    <div class="nav-user">LOGGED IN AS <span id="navUser">—</span></div>
+    <a class="btn-logout" href="admin.html">Admin Panel</a>
+    <button class="btn-logout" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="page-header">
+    <h2>// TRAINING DASHBOARD</h2>
+    <p id="welcomeMsg">Initialising security training modules...</p>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card" id="stat1">
+      <div class="stat-label">Modules Completed</div>
+      <div class="stat-value" id="statCompleted">—</div>
+    </div>
+    <div class="stat-card" id="stat2">
+      <div class="stat-label">Average Score</div>
+      <div class="stat-value green" id="statAvg">—</div>
+    </div>
+    <div class="stat-card" id="stat3">
+      <div class="stat-label">Badges Earned</div>
+      <div class="stat-value yellow" id="statBadges">—</div>
+    </div>
+  </div>
+
+  <!-- Modules -->
+  <div class="section-title">Training Modules</div>
+  <div class="modules-grid" id="modulesGrid">
+    <div class="loading">Loading modules...</div>
+  </div>
+
+  <!-- Badges -->
+  <div class="section-title">Achievements</div>
+  <div class="badges-row" id="badgesRow">
+    <div class="loading">Loading achievements...</div>
+  </div>
+</div>
+
+<script>
+  const API = 'https://y6p0nv13tb.execute-api.eu-north-1.amazonaws.com';
+
+  const modules = [
+    { id: '1', title: 'Spotting Phishing Emails', desc: 'Learn to identify fraudulent emails designed to steal your credentials and personal data.' },
+    { id: '2', title: 'Safe Password Practices', desc: 'Master the art of creating and managing strong, unique passwords to protect your accounts.' },
+    { id: '3', title: 'Social Engineering Awareness', desc: 'Recognise manipulation tactics used by attackers to exploit human psychology.' }
+  ];
+
+  const badgeDefs = [
+    { id: '1', icon: '🎣', name: 'Phish Spotter' },
+    { id: '2', icon: '🔐', name: 'Password Pro' },
+    { id: '3', icon: '🛡️', name: 'Social Guard' }
+  ];
+
+  // Auth check
+  const token = localStorage.getItem('cyberquiz_token');
+  const userEmail = localStorage.getItem('cyberquiz_user');
+  if (!token) window.location.href = 'index.html';
+
+  document.getElementById('navUser').textContent = userEmail || '—';
+  document.getElementById('welcomeMsg').textContent = `Welcome back, ${userEmail}. Complete all modules to earn your security certification.`;
+
+  function logout() {
+    localStorage.clear();
+    window.location.href = 'index.html';
+  }
+
+  async function loadDashboard() {
+    let scores = [];
+    try {
+      const res = await fetch(`${API}/progress?userId=${encodeURIComponent(userEmail)}`);
+      const data = await res.json();
+      scores = data.scores || [];
+    } catch (e) { scores = []; }
+
+    // Stats
+    const completed = scores.length;
+    const avg = completed > 0 ? Math.round(scores.reduce((a, s) => a + (s.score / s.total * 100), 0) / completed) : 0;
+    const badges = scores.filter(s => (s.score / s.total) >= 0.6).length;
+
+    document.getElementById('statCompleted').textContent = `${completed}/3`;
+    document.getElementById('statAvg').textContent = completed > 0 ? `${avg}%` : 'N/A';
+    document.getElementById('statBadges').textContent = `${badges}/3`;
+
+    ['stat1','stat2','stat3'].forEach(id => {
+      setTimeout(() => document.getElementById(id).classList.add('loaded'), 300);
+    });
+
+    // Modules grid
+    const grid = document.getElementById('modulesGrid');
+    grid.innerHTML = modules.map(m => {
+      const score = scores.find(s => s.moduleId === m.id);
+      const isDone = !!score;
+      const pct = score ? Math.round(score.score / score.total * 100) : null;
+      return `
+        <a class="module-card" href="quiz.html?module=${m.id}">
+          <div class="module-number">MODULE_0${m.id}</div>
+          <div class="module-title">${m.title}</div>
+          <div class="module-desc">${m.desc}</div>
+          <div class="module-status">
+            <span class="badge ${isDone ? 'badge-complete' : 'badge-pending'}">${isDone ? '✓ Complete' : 'Pending'}</span>
+            ${isDone ? `<span class="module-score">${score.score}/${score.total} · ${pct}%</span>` : `<span class="module-arrow">→</span>`}
+          </div>
+        </a>`;
+    }).join('');
+
+    // Badges
+    const badgesRow = document.getElementById('badgesRow');
+    badgesRow.innerHTML = badgeDefs.map(b => {
+      const score = scores.find(s => s.moduleId === b.id);
+      const earned = score && (score.score / score.total) >= 0.6;
+      return `
+        <div class="badge-item ${earned ? 'earned' : ''}">
+          <div class="badge-icon">${b.icon}</div>
+          <div class="badge-name">${b.name}</div>
+        </div>`;
+    }).join('');
+  }
+
+  loadDashboard();
+</script>
+</body>
+</html>

@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CyberQuiz — Module</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c10;
+    --surface: #0d1117;
+    --border: #1e2a36;
+    --accent: #00e5ff;
+    --accent2: #ff3e6c;
+    --text: #c9d8e8;
+    --text-dim: #4a6070;
+    --green: #00ff9d;
+    --font-mono: 'Share Tech Mono', monospace;
+    --font-main: 'Rajdhani', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-main);
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  nav {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .nav-logo {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    color: var(--accent);
+    letter-spacing: 3px;
+  }
+
+  .nav-back {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    padding: 6px 14px;
+    cursor: pointer;
+    border-radius: 2px;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .nav-back:hover { border-color: var(--accent); color: var(--accent); }
+
+  .main {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 40px 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Progress bar */
+  .progress-bar-wrap {
+    margin-bottom: 32px;
+  }
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+
+  .progress-track {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+    box-shadow: 0 0 8px var(--accent);
+  }
+
+  /* Question card */
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 36px;
+    margin-bottom: 24px;
+    animation: slideIn 0.3s ease forwards;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .question-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .question-tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 3px;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+
+  .question-text {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.5;
+    letter-spacing: 0.5px;
+  }
+
+  /* Options */
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .option {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 16px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .option::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(0,229,255,0.05), transparent);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .option:hover {
+    border-color: var(--accent);
+  }
+
+  .option:hover::before { opacity: 1; }
+
+  .option-letter {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-dim);
+    min-width: 20px;
+  }
+
+  .option-text {
+    font-size: 16px;
+    color: var(--text);
+    letter-spacing: 0.3px;
+  }
+
+  .option.correct {
+    border-color: var(--green);
+    background: rgba(0,255,157,0.08);
+  }
+
+  .option.correct .option-letter,
+  .option.correct .option-text { color: var(--green); }
+
+  .option.wrong {
+    border-color: var(--accent2);
+    background: rgba(255,62,108,0.08);
+  }
+
+  .option.wrong .option-letter,
+  .option.wrong .option-text { color: var(--accent2); }
+
+  .option.disabled { cursor: default; pointer-events: none; }
+
+  /* Feedback */
+  .feedback {
+    background: var(--surface);
+    border-radius: 3px;
+    padding: 16px 20px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 1px;
+    display: none;
+    margin-top: 4px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .feedback.show { display: block; }
+  .feedback.correct { border: 1px solid var(--green); color: var(--green); background: rgba(0,255,157,0.05); }
+  .feedback.wrong { border: 1px solid var(--accent2); color: var(--accent2); background: rgba(255,62,108,0.05); }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .btn-next {
+    width: 100%;
+    padding: 14px;
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+    display: none;
+    margin-top: 20px;
+  }
+
+  .btn-next::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    transform: translateX(-100%);
+    transition: transform 0.3s;
+    z-index: -1;
+  }
+
+  .btn-next:hover { color: var(--bg); }
+  .btn-next:hover::before { transform: translateX(0); }
+  .btn-next.show { display: block; }
+
+  /* Results */
+  #resultsScreen {
+    display: none;
+    animation: fadeIn 0.5s ease;
+  }
+
+  .results-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 48px 36px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .results-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--green), var(--accent));
+    animation: shimmer 2s linear infinite;
+    background-size: 200% 100%;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 100% 0; }
+    100% { background-position: -100% 0; }
+  }
+
+  .results-icon { font-size: 64px; margin-bottom: 20px; }
+
+  .results-title {
+    font-family: var(--font-mono);
+    font-size: 24px;
+    letter-spacing: 4px;
+    margin-bottom: 8px;
+  }
+
+  .results-title.pass { color: var(--green); text-shadow: 0 0 20px rgba(0,255,157,0.4); }
+  .results-title.fail { color: var(--accent2); }
+
+  .results-score {
+    font-family: var(--font-mono);
+    font-size: 56px;
+    color: var(--accent);
+    text-shadow: 0 0 24px rgba(0,229,255,0.4);
+    margin: 16px 0;
+  }
+
+  .results-detail {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    margin-bottom: 32px;
+  }
+
+  .results-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255,215,0,0.1);
+    border: 1px solid gold;
+    border-radius: 4px;
+    padding: 12px 20px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: gold;
+    letter-spacing: 2px;
+    margin-bottom: 32px;
+  }
+
+  .btn-dashboard {
+    display: inline-block;
+    padding: 14px 40px;
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    text-decoration: none;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-dashboard::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    transform: translateX(-100%);
+    transition: transform 0.3s;
+    z-index: -1;
+  }
+
+  .btn-dashboard:hover { color: var(--bg); }
+  .btn-dashboard:hover::before { transform: translateX(0); }
+
+  .loading {
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    padding: 60px;
+    animation: blink 1s infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">⬡ CYBERQUIZ</div>
+  <a class="nav-back" href="dashboard.html">← Dashboard</a>
+</nav>
+
+<div class="main">
+  <div id="loadingScreen" class="loading">Loading module...</div>
+
+  <div id="quizScreen" style="display:none">
+    <div class="progress-bar-wrap">
+      <div class="progress-info">
+        <span id="moduleTitle">—</span>
+        <span id="progressText">Q1 / 5</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill" style="width:20%"></div>
+      </div>
+    </div>
+
+    <div class="question-card">
+      <div class="question-tag" id="questionTag">QUESTION_01</div>
+      <div class="question-text" id="questionText">Loading...</div>
+    </div>
+
+    <div class="options" id="optionsContainer"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="btn-next" id="btnNext" onclick="nextQuestion()">Next Question →</button>
+  </div>
+
+  <div id="resultsScreen">
+    <div class="results-card">
+      <div class="results-icon" id="resultsIcon">🎯</div>
+      <div class="results-title" id="resultsTitle">COMPLETE</div>
+      <div class="results-score" id="resultsScore">0/5</div>
+      <div class="results-detail" id="resultsDetail">—</div>
+      <div class="results-badge" id="resultsBadge" style="display:none">
+        <span id="badgeIcon">🏅</span>
+        <span id="badgeName">Badge Earned!</span>
+      </div>
+      <a class="btn-dashboard" href="dashboard.html">← Back to Dashboard</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = 'https://y6p0nv13tb.execute-api.eu-north-1.amazonaws.com';
+  const letters = ['A', 'B', 'C', 'D'];
+  const badges = { '1': { icon: '🎣', name: 'Phish Spotter' }, '2': { icon: '🔐', name: 'Password Pro' }, '3': { icon: '🛡️', name: 'Social Guard' } };
+
+  const token = localStorage.getItem('cyberquiz_token');
+  const userEmail = localStorage.getItem('cyberquiz_user');
+  if (!token) window.location.href = 'index.html';
+
+  const params = new URLSearchParams(window.location.search);
+  const moduleId = params.get('module') || '1';
+
+  let questions = [], currentQ = 0, score = 0, answered = false;
+
+  async function loadModule() {
+    try {
+      const res = await fetch(`${API}/quiz?moduleId=${moduleId}`);
+      const data = await res.json();
+      questions = data.questions;
+      document.getElementById('moduleTitle').textContent = `MODULE_0${moduleId}: ${data.title}`;
+      document.getElementById('loadingScreen').style.display = 'none';
+      document.getElementById('quizScreen').style.display = 'block';
+      renderQuestion();
+    } catch (e) {
+      document.getElementById('loadingScreen').textContent = 'Error: ' + e.message + ' — Check console for details.'; console.error('Quiz load error:', e);
+    }
+  }
+
+  function renderQuestion() {
+    answered = false;
+    const q = questions[currentQ];
+    const qNum = currentQ + 1;
+
+    document.getElementById('questionTag').textContent = `QUESTION_0${qNum}`;
+    document.getElementById('questionText').textContent = q.question;
+    document.getElementById('progressText').textContent = `Q${qNum} / ${questions.length}`;
+    document.getElementById('progressFill').style.width = `${(qNum / questions.length) * 100}%`;
+
+    const feedback = document.getElementById('feedback');
+    feedback.className = 'feedback';
+    feedback.textContent = '';
+
+    document.getElementById('btnNext').className = 'btn-next';
+    document.getElementById('btnNext').textContent = currentQ < questions.length - 1 ? 'Next Question →' : 'See Results →';
+
+    const container = document.getElementById('optionsContainer');
+    container.innerHTML = q.options.map((opt, i) => `
+      <div class="option" onclick="selectOption(${i})" id="opt${i}">
+        <span class="option-letter">${letters[i]}</span>
+        <span class="option-text">${opt}</span>
+      </div>
+    `).join('');
+  }
+
+  function selectOption(selected) {
+    if (answered) return;
+    answered = true;
+
+    const q = questions[currentQ];
+    const correct = q.correct;
+    const isCorrect = selected === correct;
+
+    if (isCorrect) score++;
+
+    // Style options
+    document.querySelectorAll('.option').forEach((el, i) => {
+      el.classList.add('disabled');
+      if (i === correct) el.classList.add('correct');
+      if (i === selected && !isCorrect) el.classList.add('wrong');
+    });
+
+    // Feedback
+    const feedback = document.getElementById('feedback');
+    feedback.textContent = isCorrect
+      ? '✓ Correct! Well done.'
+      : `✗ Incorrect. The correct answer was: ${q.options[correct]}`;
+    feedback.className = `feedback show ${isCorrect ? 'correct' : 'wrong'}`;
+
+    document.getElementById('btnNext').className = 'btn-next show';
+  }
+
+  async function nextQuestion() {
+    currentQ++;
+    if (currentQ < questions.length) {
+      renderQuestion();
+    } else {
+      await submitResults();
+      showResults();
+    }
+  }
+
+  async function submitResults() {
+    try {
+      await fetch(`${API}/score`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: userEmail,
+          moduleId: moduleId,
+          score: score,
+          total: questions.length
+        })
+      });
+    } catch (e) { console.error('Score submit failed', e); }
+  }
+
+  function showResults() {
+    document.getElementById('quizScreen').style.display = 'none';
+    document.getElementById('resultsScreen').style.display = 'block';
+
+    const pct = Math.round((score / questions.length) * 100);
+    const pass = score >= 3;
+    const badge = badges[moduleId];
+
+    document.getElementById('resultsIcon').textContent = pass ? '🏆' : '📚';
+    document.getElementById('resultsTitle').textContent = pass ? 'MODULE PASSED' : 'KEEP TRAINING';
+    document.getElementById('resultsTitle').className = `results-title ${pass ? 'pass' : 'fail'}`;
+    document.getElementById('resultsScore').textContent = `${score}/${questions.length}`;
+    document.getElementById('resultsDetail').textContent = `You scored ${pct}% · ${pass ? 'Badge earned!' : 'Score 60% or above to earn the badge'}`;
+
+    if (pass && badge) {
+      const badgeEl = document.getElementById('resultsBadge');
+      badgeEl.style.display = 'inline-flex';
+      document.getElementById('badgeIcon').textContent = badge.icon;
+      document.getElementById('badgeName').textContent = badge.name + ' Badge Unlocked!';
+    }
+  }
+
+  loadModule();
+</script>
+</body>
+</html>

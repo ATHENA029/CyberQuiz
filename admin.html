@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CyberQuiz — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c10;
+    --surface: #0d1117;
+    --border: #1e2a36;
+    --accent: #00e5ff;
+    --accent2: #ff3e6c;
+    --text: #c9d8e8;
+    --text-dim: #4a6070;
+    --green: #00ff9d;
+    --yellow: #ffd700;
+    --font-mono: 'Share Tech Mono', monospace;
+    --font-main: 'Rajdhani', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-main);
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  nav {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .nav-logo {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    color: var(--accent);
+    letter-spacing: 3px;
+  }
+
+  .nav-badge {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    background: rgba(255,62,108,0.1);
+    border: 1px solid var(--accent2);
+    color: var(--accent2);
+    padding: 4px 12px;
+    border-radius: 2px;
+    letter-spacing: 2px;
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .btn-back {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    padding: 6px 14px;
+    cursor: pointer;
+    border-radius: 2px;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .btn-back:hover { border-color: var(--accent); color: var(--accent); }
+
+  .main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .page-header {
+    margin-bottom: 32px;
+    animation: fadeIn 0.4s ease forwards;
+  }
+
+  .page-header h2 {
+    font-family: var(--font-mono);
+    font-size: 22px;
+    letter-spacing: 2px;
+  }
+
+  .page-header p {
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 1px;
+    margin-top: 6px;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Stats */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 36px;
+    animation: fadeIn 0.4s ease 0.1s both;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px;
+  }
+
+  .stat-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .stat-value {
+    font-family: var(--font-mono);
+    font-size: 28px;
+    color: var(--accent);
+  }
+
+  .stat-value.green { color: var(--green); }
+  .stat-value.yellow { color: var(--yellow); }
+  .stat-value.red { color: var(--accent2); }
+
+  /* Search */
+  .search-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    animation: fadeIn 0.4s ease 0.2s both;
+  }
+
+  .search-input {
+    flex: 1;
+    padding: 10px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--text-dim); }
+
+  /* Table */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    animation: fadeIn 0.4s ease 0.3s both;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead tr {
+    border-bottom: 1px solid var(--border);
+    background: rgba(0,229,255,0.03);
+  }
+
+  th {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 14px 20px;
+    text-align: left;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(0,229,255,0.02); }
+
+  td {
+    padding: 14px 20px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  .user-email {
+    color: var(--accent);
+    font-size: 12px;
+  }
+
+  .module-pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 2px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    margin: 2px;
+  }
+
+  .pill-done {
+    background: rgba(0,255,157,0.1);
+    border: 1px solid var(--green);
+    color: var(--green);
+  }
+
+  .pill-pending {
+    background: rgba(74,96,112,0.15);
+    border: 1px solid var(--text-dim);
+    color: var(--text-dim);
+  }
+
+  .score-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .score-bar-track {
+    width: 80px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .score-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: var(--accent);
+  }
+
+  .score-bar-fill.good { background: var(--green); }
+  .score-bar-fill.bad { background: var(--accent2); }
+
+  .score-text {
+    font-size: 12px;
+    color: var(--text-dim);
+    min-width: 36px;
+  }
+
+  .no-data {
+    text-align: center;
+    padding: 40px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+  }
+
+  .section-title {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Lookup section */
+  .lookup-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 24px;
+    margin-bottom: 32px;
+    animation: fadeIn 0.4s ease 0.15s both;
+  }
+
+  .lookup-row {
+    display: flex;
+    gap: 12px;
+  }
+
+  .btn-lookup {
+    padding: 10px 24px;
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn-lookup:hover { background: rgba(0,229,255,0.1); }
+
+  .lookup-result {
+    margin-top: 16px;
+    padding: 16px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    display: none;
+  }
+
+  .lookup-result.show { display: block; }
+  .lookup-result .result-line { margin-bottom: 8px; }
+  .lookup-result .result-line span { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div style="display:flex;align-items:center;gap:16px">
+    <div class="nav-logo">⬡ CYBERQUIZ</div>
+    <div class="nav-badge">ADMIN PANEL</div>
+  </div>
+  <div class="nav-right">
+    <a class="btn-back" href="dashboard.html">← Dashboard</a>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="page-header">
+    <h2>// ADMIN OVERVIEW</h2>
+    <p>Monitor user progress and training completion across the organisation</p>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Total Users</div>
+      <div class="stat-value" id="totalUsers">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Completions</div>
+      <div class="stat-value green" id="totalCompletions">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Avg Score</div>
+      <div class="stat-value yellow" id="avgScore">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Badges Awarded</div>
+      <div class="stat-value" id="totalBadges">—</div>
+    </div>
+  </div>
+
+  <!-- User Lookup -->
+  <div class="section-title">User Lookup</div>
+  <div class="lookup-card">
+    <div class="lookup-row">
+      <input class="search-input" id="lookupEmail" placeholder="Enter user email address..." />
+      <button class="btn-lookup" onclick="lookupUser()">Search →</button>
+    </div>
+    <div class="lookup-result" id="lookupResult"></div>
+  </div>
+
+  <!-- Recent Activity Table -->
+  <div class="section-title">Recent Activity</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Module</th>
+          <th>Score</th>
+          <th>Performance</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="activityTable">
+        <tr><td colspan="5" class="no-data">Loading activity...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  const API = 'https://y6p0nv13tb.execute-api.eu-north-1.amazonaws.com';
+  const token = localStorage.getItem('cyberquiz_token');
+  if (!token) window.location.href = 'index.html';
+
+  const moduleNames = { '1': 'Phishing Emails', '2': 'Password Safety', '3': 'Social Engineering' };
+
+  // Pre-populated demo data for display purposes
+  // In a real deployment, this would pull from a DynamoDB scan
+  const demoData = [
+    { userId: 'alice@example.com', moduleId: '1', score: 5, total: 5 },
+    { userId: 'alice@example.com', moduleId: '2', score: 4, total: 5 },
+    { userId: 'bob@example.com', moduleId: '1', score: 3, total: 5 },
+    { userId: 'charlie@example.com', moduleId: '3', score: 2, total: 5 },
+    { userId: 'diana@example.com', moduleId: '1', score: 5, total: 5 },
+    { userId: 'diana@example.com', moduleId: '2', score: 5, total: 5 },
+    { userId: 'diana@example.com', moduleId: '3', score: 4, total: 5 },
+  ];
+
+  function renderStats(data) {
+    const users = [...new Set(data.map(d => d.userId))];
+    const avg = Math.round(data.reduce((a, d) => a + (d.score / d.total * 100), 0) / data.length);
+    const badges = data.filter(d => d.score / d.total >= 0.6).length;
+
+    document.getElementById('totalUsers').textContent = users.length;
+    document.getElementById('totalCompletions').textContent = data.length;
+    document.getElementById('avgScore').textContent = avg + '%';
+    document.getElementById('totalBadges').textContent = badges;
+  }
+
+  function renderTable(data) {
+    const tbody = document.getElementById('activityTable');
+    if (!data.length) {
+      tbody.innerHTML = '<tr><td colspan="5" class="no-data">No activity recorded yet</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = data.map(d => {
+      const pct = Math.round(d.score / d.total * 100);
+      const pass = d.score >= 3;
+      const barClass = pct >= 80 ? 'good' : pct < 60 ? 'bad' : '';
+      return `
+        <tr>
+          <td><span class="user-email">${d.userId}</span></td>
+          <td><span class="module-pill pill-done">Module ${d.moduleId}: ${moduleNames[d.moduleId]}</span></td>
+          <td>${d.score}/${d.total}</td>
+          <td>
+            <div class="score-bar-wrap">
+              <div class="score-bar-track">
+                <div class="score-bar-fill ${barClass}" style="width:${pct}%"></div>
+              </div>
+              <span class="score-text">${pct}%</span>
+            </div>
+          </td>
+          <td><span class="module-pill ${pass ? 'pill-done' : 'pill-pending'}">${pass ? '✓ Pass' : '✗ Fail'}</span></td>
+        </tr>`;
+    }).join('');
+  }
+
+  async function lookupUser() {
+    const email = document.getElementById('lookupEmail').value.trim();
+    if (!email) return;
+
+    const result = document.getElementById('lookupResult');
+    result.className = 'lookup-result show';
+    result.innerHTML = '<span style="color:var(--text-dim)">Searching...</span>';
+
+    try {
+      const res = await fetch(`${API}/progress?userId=${encodeURIComponent(email)}`);
+      const data = await res.json();
+      const scores = data.scores || [];
+
+      if (!scores.length) {
+        result.innerHTML = `<div class="result-line">No data found for <span>${email}</span></div>`;
+        return;
+      }
+
+      const completed = scores.length;
+      const avg = Math.round(scores.reduce((a, s) => a + (s.score / s.total * 100), 0) / completed);
+      const badges = scores.filter(s => s.score / s.total >= 0.6).length;
+
+      result.innerHTML = `
+        <div class="result-line">User: <span>${email}</span></div>
+        <div class="result-line">Modules completed: <span>${completed}/3</span></div>
+        <div class="result-line">Average score: <span>${avg}%</span></div>
+        <div class="result-line">Badges earned: <span>${badges}/3</span></div>
+        <div style="margin-top:12px">${scores.map(s => `
+          <div class="result-line">→ Module ${s.moduleId} (${moduleNames[s.moduleId]}): <span>${s.score}/${s.total} · ${Math.round(s.score/s.total*100)}%</span></div>
+        `).join('')}</div>`;
+    } catch (e) {
+      result.innerHTML = `<div class="result-line" style="color:var(--accent2)">Error fetching data. Check the API connection.</div>`;
+    }
+  }
+
+  // Load demo stats + render
+  renderStats(demoData);
+  renderTable(demoData);
+
+  // Enter key for lookup
+  document.getElementById('lookupEmail').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') lookupUser();
+  });
+</script>
+</body>
+</html>
